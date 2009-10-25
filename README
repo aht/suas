@@ -29,7 +29,7 @@ session.py
 	all your handlers and you can use session as an attribute of
 	the handler.
 
-handlers.py
+example/handlers.py
 	* provides user authentication handlers, you'll need to adapt to your app.
 	* serves an example of how to use "session.py".
 

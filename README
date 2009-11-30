@@ -6,17 +6,14 @@ SUAS stands for Simple User Authentication & Session.  It is a package for
 Google AppEngine that provides:
 	* a simple user authentication implementation in Datastore as an
 	alternative to Google Accounts
-	* cookie-only signed sessions, no memcached/Datastore
+	* cookie-only HMAC-SHA256 signed sessions, no memcached/Datastore
+
 
 Install
 =======
 
-Place the suas directory under your app_dir.  I'd put it under app_dir/ext/.
-Then, fetch the git submodule (aetycoon):
+Place the suas directory somewhere under your app_dir/ and import it.
 
-	$ cd app_dir/ext/suas
-	$ git submodule init
-	$ git submodule update
 
 Usage
 =====
@@ -30,8 +27,9 @@ session.py
 	the handler.
 
 example/handlers.py
-	* provides user authentication handlers, you'll need to adapt to your app.
-	* serves an example of how to use "session.py".
+	* provides skeletal user authentication handlers: /login, /logout, /signup,
+	/confirmsignup, @login_required.  You'll need to adapt to your app.
+
 
 Extra
 =====

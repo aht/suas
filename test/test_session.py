@@ -29,10 +29,6 @@ class Regen(RequestHandler):
 	def post(self):
 		self.session.regen()
 
-class Touch(RequestHandler):
-	def get(self):
-		pass
-
 class Logout(RequestHandler):
 	def get(self):
 		self.session.end()
@@ -41,7 +37,6 @@ def application():
 	return webapp.WSGIApplication(
 			[	('/login', Login),
 				('/regen', Regen),
-				('/touch', Touch),
 				('/logout', Logout)	],
 			debug=True)
 
@@ -57,7 +52,7 @@ def test_login():
 	assert 'SID=' in res
 	assert 'user="foo' in res
 	assert 'atime=' in res
-	
+
 def test_logout():
 	app = TestApp(application())
 

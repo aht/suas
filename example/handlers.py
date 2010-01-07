@@ -25,9 +25,10 @@ class Signup(RequestHandler):
 			self.session[ 'flash_msg' ] = '<p>Sorry, the nickname you chose is already taken.</p>'
 			self.redirect(self.request.url)
 			return
-		signup = UserSignup(user=user, key_name=signup_id(nickname))
+		id = signup_id(nickname)
+		signup = UserSignup(user=user, key_name=id)
 		signup.put()
-		confirm_url = self.request.relative_url('confirmsignup?id='+signup.id)
+		confirm_url = self.request.relative_url('confirmsignup?id='+id)
 		from google.appengine.api import mail
 		sender = 'Registrar <registrar@app-id.appspotmail.com>'
 		subject = 'Confirm your registration'

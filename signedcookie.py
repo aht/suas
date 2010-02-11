@@ -25,9 +25,11 @@ A SignedCookie is constructed with a secret key as the argument.
 
 Loading also works.
 
->>> c.load('Cookie: itemid="12345mwKEC0M1343j/uvi3DIwLsiQWw7UP0Ue/84NxBUwljI="')
+>>> c.load('Cookie: itemid="12345mwKEC0M1343j/uvi3DIwLsiQWw7UP0Ue/84NxBUwljI="; Max-Age=100')
 >>> c['itemid'].value
 '12345'
+>>> int(c['itemid']['max-age'])
+100
 """
 
 import re
@@ -83,8 +85,8 @@ class SignedCookie(Cookie.SimpleCookie):
 	## Changed the last block to use decode & verify signature
 	def __ParseString(self, str, patt=Cookie._CookiePattern):
 		i = 0			# Our starting point
-		n = len(str)	 # Length of string
-		M = None		 # current morsel
+		n = len(str)		# Length of string
+		M = None		# current morsel
 
 		while 0 <= i < n:
 			# Start looking for a cookie
@@ -103,7 +105,7 @@ class SignedCookie(Cookie.SimpleCookie):
 					M[ K[1:] ] = V
 			elif K.lower() in Cookie.Morsel._reserved:
 				if M:
-					M[ K ] = _unquote(V)
+					M[ K ] = Cookie._unquote(V)
 			else:
 				if not SIG_PATTERN.search(V):
 					pass

@@ -111,7 +111,12 @@ class SignedCookie(Cookie.SimpleCookie):
 					pass
 				uval = Cookie._unquote(V)
 				real_val = uval[:-SIG_LEN]
-				sig = b64decode( uval[-SIG_LEN:] )
+				try:
+					sig = b64decode( uval[-SIG_LEN:] )
+				except TypeError:
+					# Incorrect padding
+					raise BadSignatureError("Bad signature for cookie '%s'" % K)
+				# TODO: use constant time string comparison
 				if sig != hmac.new(self.key + K, real_val, sha256).digest():
 					raise BadSignatureError("Bad signature for cookie '%s'" % K)
 				self._BaseCookie__set(K, real_val, V)

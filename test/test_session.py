@@ -15,7 +15,7 @@ sys.path.append( os.path.abspath( os.path.join( os.path.dirname(__file__), '..')
 from signedcookie import SignedCookie, SIG_LEN
 from session import RequestHandler, SECRET_KEY, SESSION_TTL, SID_TTL
 
-# fake
+# mock
 class User:
 	def __init__(self, nickname):
 		self.nickname = nickname
@@ -134,5 +134,3 @@ def test_autoexpire():
 	assert re.search('user=.*Max-Age=0', res)
 	assert re.search('atime=.*Max-Age=0', res)
 
-if __name__== "__main__":
-	util.run_wsgi_app( application() )

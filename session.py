@@ -31,18 +31,18 @@ from users import User
 SECRET_KEY = 'Open, sesame!'
 # A secret key unique to your application.
 
-SESSION_TTL = 604800		# 604800s = 7d
+SESSION_TTL = 604800    # 604800s = 7d
 # the life time of a "persistent" session authenticator, in seconds.
 # As long as the user comes back within that time frame, we will nenew
 # his session for a full period.  In case he doesn't, he will have to
 # login again.
 
-SID_TTL = 900				# 900s = 15m
+SID_TTL = 900           # 900s = 15m
 # the minimum interval between requests after which
 # we expire the old and issue a new ID.
 
 
-class NoSessionCookieError(Exception):
+class NoSIDError(Exception):
 	pass
 
 class CookieSession:
@@ -143,7 +143,7 @@ class CookieSession:
 		try:
 			id = request.cookies['SID'][1:-SIG_LEN-1]
 		except KeyError:
-			raise NoSessionCookieError
+			raise NoSIDError
 		else:
 			c = SignedCookie(SECRET_KEY + id)
 			c.load(request.environ['HTTP_COOKIE'])
@@ -207,7 +207,7 @@ class RequestHandler(webapp.RequestHandler):
 		super(RequestHandler, self).initialize(request, response)
 		try:
 			self.session = CookieSession.load(request, response)
-		except NoSessionCookieError:
+		except NoSIDError:
 			self.session = CookieSession(None, self.response)
 		except BadSignatureError:
 			self.session = CookieSession(None, self.response)
@@ -224,3 +224,4 @@ class RequestHandler(webapp.RequestHandler):
 				return
 			if now - atime > SID_TTL:
 				self.session.regen()
+

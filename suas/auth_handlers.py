@@ -3,23 +3,66 @@
 
 """
 Provide user authentication request handlers.  Their names should be
-self-explanatory.  You will need to modify them to work with your app.
+self-explanatory.  You might need to adapt to suit your app's need.
+
+Utility method: login_required -- for use as a decorator.
 """
 
 from google.appengine.ext.webapp import template
 
+from session import RequestHandler
 from users import User, UserSignup, salt_n_hash, signup_id
 
+# Adapt to use your app's view.
+SIGNUP_VIEW = template.Template("""
+<head><title>Sign up</title></head>
+<body>
+{% if session.flash_msg %}
+	<p>{{ session.flash_msg }}</p>
+{% endif %}
+<form action="/signup" method="post">
+    <label for="nickname">Nickname: </label><input type="text" id="nickname" name="nickname"><br />
+    <label for="email">Email: </label><input type="text" id="email" name="email"><br />
+    <label for="password">Password: </label><input type="password" id="password" name="password"><br />
+    <label for="password2">Confirm: </label><input type="password" id="password2" name="password2"><br />
+    <input type="submit" value="Sign up">
+</form>
+</body>
+""")
+
+LOGIN_VIEW = template.Template("""
+<head><title>Sign up</title></head>
+<body>
+{% if session.flash_msg %}
+	<p>{{ session.flash_msg }}</p>
+{% endif %}
+<form action="/login" method="post">
+    <label for="nickname">Nickname: </label><input type="text" id="nickname" name="nickname"><br />
+    <label for="pwd">Password: </label><input type="password" id="pwd" name="pwd"><br />
+    <input type="submit" value="Login">
+</form>
+</body>
+""")
 
 class Signup(RequestHandler):
+	def get(self):
+		ctx = template.Context({"session": self.session})
+		self.response.out.write(SIGNUP_VIEW.render(ctx))
+
 	def post(self):
-		nickname = self.request.get( 'nickname' )
-		email = self.request.get( 'email' )
-		password = self.request.get( 'password' )
+		nickname = self.request.get('nickname')
+		email = self.request.get('email')
+		password = self.request.get('password')
+		password2 = self.request.get('password2')
+		if password2 != password:
+			self.session.start(None)
+			self.session[ 'flash_msg' ] = '<p>Password fields did not match.</p>'
+			self.redirect('/signup')
+			return
 		user = User.get_or_insert(nickname=nickname,
-							email=email,
-							pwd=salt_n_hash(password),
-							key_name=nickname)
+					email=email,
+					pwd=salt_n_hash(password),
+					key_name=nickname)
 		self.session.start(None)
 		if not User.authenticate(nickname, password):
 			self.session[ 'flash_msg' ] = '<p>Sorry, the nickname you chose is already taken.</p>'
@@ -37,7 +80,7 @@ class Signup(RequestHandler):
 			'To confirm your registration, please visit the link below:\n\n' + \
 			'<%s>\n' % confirm_url
 		mail.send_mail( sender, email, subject, body )
-		self.session[ 'flash_msg' ] = \
+		self.session['flash_msg'] = \
 			'<p>Thank you for signing up, %s! A confirmation ' % nickname + \
 			'message is on its way to your email inbox. It will contain a link ' + \
 			'which you will need to visit in order to complete your registration.</p>' + \
@@ -63,6 +106,10 @@ class ConfirmSignup(RequestHandler):
 
 class Login(RequestHandler):
 	"""Handle /login?redirect=%s request. You will need to define your GET method handler."""
+	def get(self):
+		ctx = template.Context({"session": self.session})
+		self.response.out.write(LOGIN_VIEW.render(ctx))
+	
 	def post(self):
 		user = User.authenticate(self.request.get('nickname'), self.request.get('password'))
 		if user and not user.suspended:
@@ -71,7 +118,7 @@ class Login(RequestHandler):
 			self.redirect(redirect)
 		else:
 			self.session.start( None )
-			self.session[ 'flash_msg' ] = '<p>Incorrect nickname/password combination. Sorry!</p>'
+			self.session['flash_msg'] = '<p>Incorrect nickname/password combination. Sorry!</p>'
 			self.redirect(self.request.url)
 
 
@@ -103,10 +150,11 @@ class Logout(RequestHandler):
 		self.session['flash_msg'] = '<p>Goodbye, %s!</p>' % nickname
 		self.redirect('/login')
 
-
-ROUTES = (
+# Add this to your app's routes.
+ROUTES = [
 	('/signup', Signup),
 	('/confirmsignup', ConfirmSignup),
 	('/login', Login),
 	('/logout', Logout)
-)
+]
+

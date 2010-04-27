@@ -12,7 +12,9 @@ Google AppEngine that provides:
 Install
 =======
 
-Place the suas directory somewhere under your app_dir/ and import it.
+Place the ./suas directory somewhere under your app_dir/ and import it.
+
+Generate a new suas.session.SECRET_KEY. This is CRUCIAL!
 
 
 Usage
@@ -26,14 +28,22 @@ session.py
 	all your handlers and you can use session as an attribute of
 	the handler.
 
-example/handlers.py
-	* provides skeletal user authentication handlers: /login, /logout, /signup,
+auth_handlers.py
+	* provides user authentication handlers: /login, /logout, /signup,
 	/confirmsignup, @login_required.  You'll need to adapt to your app.
 
+Utility
+=======
 
-Extra
-=====
+session.login_required
+	a decorator ditto google.appengine.api.users
 
-"flash_msg"
-	set this cookie and it's automatically popped to session.flash_msg in
-	the next page
+session.flash_msg
+	set this attribute and it's automatically popped to
+	session.flash_msg of the next request
+
+Demo
+====
+
+The root directory is a fully functional signup/login/logout app.
+It is live at <http://suas-demo.appspot.com/>.
